@@ -17,7 +17,7 @@ CORS(app)
 !! NOTE THIS MUST BE UNCOMMENTED ON FIRST RUN
 !! Running this function will add one
 '''
-db_drop_and_create_all()
+# db_drop_and_create_all()
 
 # ROUTES
 '''
@@ -82,16 +82,19 @@ def create_drinks(_):
         new_recipe = body.get('recipe')
         # print(new_title)
         # print(new_recipe)
-
-        drink = Drink(
-            title=new_title,
-            recipe=json.dumps(new_recipe)
-        )
-        drink.insert()
-        return jsonify({
-            'success': True,
-            'drinks': [drink.long()],
+        if(new_recipe and len(new_recipe) != 0):
+            drink = Drink(
+                title=new_title,
+                recipe=json.dumps(new_recipe)
+            )
+            drink.insert()
+            rs = [drink.long()]
+            return jsonify({
+                'success': True,
+                'drinks': rs,
             })
+        else: 
+            abort(422)
     except:
         abort(422)
 
@@ -108,7 +111,7 @@ def create_drinks(_):
 '''
 @app.route('/drinks/<int:id>', methods=['PATCH'])
 @requires_auth('patch:drinks')
-def update_drink(id):
+def update_drink(_,id):
     try:
         drink = Drink.query.filter(Drink.id == id).one_or_none()
         if drink is None:
@@ -145,7 +148,7 @@ def update_drink(id):
 '''
 @app.route('/drinks/<int:id>', methods=['DELETE'])
 @requires_auth('delete:drinks')
-def delete_drink(id):
+def delete_drink(_,id):
     try:
         drink = Drink.query.filter(Drink.id == id).one_or_none()
         if drink is None:
